@@ -635,7 +635,7 @@ module Beaker
             end
 
             # PE-18799 replace the version_is_less with a use_meep_for_classification? test
-            if use_meep_for_classification?(master[:pe_ver], options)
+            if use_meep_for_classification?(master[:pe_ver], opts) && opts[:type] != :upgrade
               configure_puppet_agent_service(:ensure => 'stopped', :enabled => false)
             end
 
