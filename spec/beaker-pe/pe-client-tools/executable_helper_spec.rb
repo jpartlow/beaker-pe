@@ -57,26 +57,26 @@ describe MixedWithExecutableHelper do
   end
 
   context 'puppet access login with lifetime parameter' do
-    let(:logger) {Beaker::Logger.new}
-    let(:test_host) {Beaker::Host.create('my_super_host',
-                                         {:roles => ['master', 'agent'],
-                                          :platform => 'linux',
-                                          :type => 'pe'},
-                                          make_opts)}
+    let(:test_host) do
+      make_host('my_super_host',
+                {:roles => ['master', 'agent'],
+                 :platform => 'linux',
+                 :type => 'pe'})
+    end
     let(:username) {'T'}
     let(:password) {'Swift'}
-    let(:credentials) {{:login => username, :password => password}}
-    let(:test_dispatcher) {Scooter::HttpDispatchers::ConsoleDispatcher.new('my_super_host', credentials)}
-
-    before do
-      allow(logger).to receive(:debug) { true }
-      expect(test_dispatcher).to be_kind_of(Scooter::HttpDispatchers::ConsoleDispatcher)
-      expect(test_host).to be_kind_of(Beaker::Host)
-      expect(test_host).to receive(:exec)
-    end
+    let(:credentials) { double('credentials', :login => username, :password => password) }
+    let(:test_dispatcher) { double('dispatcher', :credentials => credentials) }
 
     it 'accepts correct value' do
-      expect{subject.login_with_puppet_access_on(test_host, test_dispatcher, {:lifetime => '5d'})}.not_to raise_error
+      expect(subject).to receive(:puppet_access_on)
+        .with(
+          test_host,
+          'login',
+          '--lifetime 5d',
+          {:stdin => "T\nSwift\n"}
+        )
+      subject.login_with_puppet_access_on(test_host, test_dispatcher, {:lifetime => '5d'})
     end
   end
 end
