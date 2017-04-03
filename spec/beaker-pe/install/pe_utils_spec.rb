@@ -1263,6 +1263,7 @@ describe ClassMixedWithDSLInstallUtils do
 
       allow(subject).to receive(:stop_agent_on)
       allow(subject).to receive(:sign_certificate_for)
+      allow(subject).to receive(:configure_puppet_agent_service_stopped)
     end
 
     describe 'configuring frictionless installer' do

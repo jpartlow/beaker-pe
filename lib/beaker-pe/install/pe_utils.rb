@@ -480,6 +480,8 @@ module Beaker
             stop_agent_on(all_hosts, :run_in_parallel => true)
           end
 
+          configure_puppet_agent_service_stopped(opts)
+
           step "Run puppet to setup mcollective and pxp-agent" do
             on all_hosts, puppet_agent('-t'), :acceptable_exit_codes => [0,2], :run_in_parallel => true
 
@@ -634,10 +636,7 @@ module Beaker
               on dashboard, "/opt/puppet/bin/rake -sf /opt/puppet/share/puppet-dashboard/Rakefile #{task} RAILS_ENV=production"
             end
 
-            # PE-18799 replace the version_is_less with a use_meep_for_classification? test
-            if use_meep_for_classification?(master[:pe_ver], opts) && opts[:type] != :upgrade
-              configure_puppet_agent_service(:ensure => 'stopped', :enabled => false)
-            end
+            configure_puppet_agent_service_stopped(opts)
 
             step "Final puppet agent run" do
               # Now that all hosts are in the dashbaord, run puppet one more
@@ -1234,6 +1233,16 @@ module Beaker
             Scooter::HttpDispatchers::ConsoleDispatcher.new(dashboard)
           else
             get_dispatcher
+          end
+        end
+
+        # Helper method shared by install workflows configures the agent service
+        # as stopped and disabled if we are not upgraded and the version being
+        # installed is >= the MEEP_CLASSIFICATION_VERSION.
+        def configure_puppet_agent_service_stopped(opts)
+          # PE-18799 replace the version_is_less with a use_meep_for_classification? test
+          if use_meep_for_classification?(master[:pe_ver], opts) && opts[:type] != :upgrade
+            configure_puppet_agent_service(:ensure => 'stopped', :enabled => false)
           end
         end
 
