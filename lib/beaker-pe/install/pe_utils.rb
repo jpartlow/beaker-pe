@@ -326,7 +326,7 @@ module Beaker
             on dashboard, "cd /opt/puppet/share/puppet-dashboard && /opt/puppet/bin/bundle exec /opt/puppet/bin/rake node:addclass[#{master},#{klass}]"
             on master, puppet("agent -t"), :acceptable_exit_codes => [0,2]
           else
-            _console_dispatcher = get_console_dispatcher_for_beaker_pe!
+            _console_dispatcher = get_console_dispatcher_for_beaker_pe
 
             # Check if we've already created a frictionless agent node group
             # to avoid errors creating the same node group when the beaker hosts file contains
@@ -1228,27 +1228,13 @@ module Beaker
 
         # Being able to modify PE's classifier requires the Scooter gem and
         # helpers which are in beaker-pe-large-environments.
-        def get_console_dispatcher_for_beaker_pe(raise_exception = false)
-          # XXX RE-8616, once scooter is public, we can remove this and just
-          # reference ConsoleDispatcher directly.
+        def get_console_dispatcher_for_beaker_pe
           if !respond_to?(:get_dispatcher)
-            begin
-              require 'scooter'
-              Scooter::HttpDispatchers::ConsoleDispatcher.new(dashboard)
-            rescue LoadError => e
-              logger.notify('WARNING: gem scooter is required for frictionless installation post 3.8')
-              raise e if raise_exception
-
-              return nil
-            end
+            require 'scooter'
+            Scooter::HttpDispatchers::ConsoleDispatcher.new(dashboard)
           else
             get_dispatcher
           end
-        end
-
-        # Will raise a LoadError if unable to require Scooter.
-        def get_console_dispatcher_for_beaker_pe!
-          get_console_dispatcher_for_beaker_pe(true)
         end
 
         # In PE versions >= 2017.1.0, allows you to configure the puppet agent
