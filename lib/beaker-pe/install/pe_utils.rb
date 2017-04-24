@@ -1241,13 +1241,13 @@ module Beaker
         # installed is >= the MEEP_CLASSIFICATION_VERSION.
         def configure_puppet_agent_service_stopped(opts)
           # PE-18799 replace the version_is_less with a use_meep_for_classification? test
-          if use_meep_for_classification?(master[:pe_ver], opts) && opts[:type] != :upgrade
+          if use_meep_for_classification?(master[:pe_ver], opts) #&& opts[:type] != :upgrade
             configure_puppet_agent_service(:ensure => 'stopped', :enabled => false)
           end
         end
 
-        # In PE versions >= 2017.1.0, allows you to configure the puppet agent
-        # service for all nodes.
+        # In PE versions >= {MEEP_CLASSIFICATION_VERSION}, allows you to
+        # configure the puppet agent service for all nodes.
         #
         # @param parameters [Hash] - agent profile parameters
         # @option parameters [Boolean] :managed - whether or not to manage the
@@ -1255,9 +1255,9 @@ module Beaker
         # @option parameters [String] :ensure - 'stopped', 'running'
         # @option parameters [Boolean] :enabled - whether the service will be
         #   enabled (for restarts)
-        # @raise [StandardError] if master version is less than 2017.1.0
+        # @raise [StandardError] if master version is less than {MEEP_CLASSIFICATION_VERSION} 
         def configure_puppet_agent_service(parameters)
-          raise(StandardError, "Can only manage puppet service in PE versions >= 2017.1.0; tried for #{master['pe_ver']}") if version_is_less(master['pe_ver'], '2017.1.0')
+          raise(StandardError, "Can only manage puppet service in PE versions >= #{MEEP_CLASSIFICATION_VERSION}; tried for #{master['pe_ver']}") if version_is_less(master['pe_ver'], MEEP_CLASSIFICATION_VERSION)
           puppet_managed = parameters.include?(:managed) ? parameters[:managed] : true
           puppet_ensure = parameters[:ensure]
           puppet_enabled = parameters[:enabled]
